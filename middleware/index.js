@@ -60,33 +60,66 @@ middleware._refineFactory = (object) => {
   return object;
 };
 
-middleware.checkUserAuth = (req, res, next) => {
-  try {
-    let token =
-      typeof req.headers.authorization.split(" ") === "object" &&
-      req.headers.authorization.split(" ").length === 2
-        ? req.headers.authorization.split(" ")
-        : false;
-    if (token) {
-      helpers.verifyToken(token[1], (err, tokenData) => {
-        if (!err && tokenData) {
-          req.mwValue = {};
-          req.mwValue.auth = tokenData;
-          next();
-        } else {
-          res
-            .status(403)
-            .json(helpers.response("403", "error", "User Unauthorized"));
-        }
-      });
-    } else {
-      res.status(403).json(helpers.response("403", "error", "Token not valid"));
+middleware.checkUserAuth =
+  (role = []) =>
+  (req, res, next) => {
+    try {
+      let token =
+        typeof req.headers.authorization.split(" ") === "object" &&
+        req.headers.authorization.split(" ").length === 2
+          ? req.headers.authorization.split(" ")
+          : false;
+      if (token) {
+        helpers.verifyToken(token[1], (err, tokenData) => {
+          if (role.length != 0 && !role.includes(tokenData.type)) {
+            return res.status(403).send({ error: 1, msg: "access denied." });
+          }
+          if (!err && tokenData) {
+            req.mwValue = {};
+            req.mwValue.auth = tokenData;
+
+            next();
+          } else {
+            res
+              .status(403)
+              .json(helpers.response("403", "error", "User Unauthorized"));
+          }
+        });
+      } else {
+        res
+          .status(403)
+          .json(helpers.response("403", "error", "Token not valid"));
+      }
+    } catch (err) {
+      res
+        .status(403)
+        .json(helpers.response("403", "error", "Token not valid", err.message));
     }
-  } catch (err) {
-    res
-      .status(403)
-      .json(helpers.response("403", "error", "Token not valid", err.message));
-  }
-};
+  };
+
+// middleware.checkRoles =
+//   (role = []) =>
+//   (req, res, next) => {
+//     if (
+//       !req.headers.authorization ||
+//       req.headers.authorization.split(" ")[0] !== "Bearer"
+//     ) {
+//       return res.status(401).send({ error: 1, msg: "you must be login in." });
+//     }
+//     const token = req.headers.authorization.split(" ")[1];
+//     helpers.verifyToken(token[1], (err, tokenData) => {
+//       if (!err && tokenData) {
+//         if (role.length != 0 && !role.includes(type)) {
+//           return res.status(403).send({ error: 1, msg: "access denied." });
+//         }
+
+//         next();
+//       } else {
+//         res
+//           .status(403)
+//           .json(helpers.response("403", "error", "User Unauthorized" + err));
+//       }
+//     });
+//   };
 
 export default middleware;

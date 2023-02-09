@@ -4,12 +4,7 @@ import { config } from "dotenv";
 import crypto from "crypto";
 import jwt from "jsonwebtoken";
 
-const GLOBAL = {
-  lat: 20.2956223,
-  lng: 85.8425417,
-  range: 0.02,
-};
-
+import { GLOBAL } from "../config/configurations";
 config();
 function calcCrow(lat1, lon1, lat2, lon2) {
   var R = 6371; // km
@@ -200,16 +195,37 @@ attendance.check = async (req, res) => {
 
   try {
     //This function takes in latitude and longitude of two location and returns the distance between them as the crow flies (in km)
-
+    let d = new Date();
     let checkToday = await knex
-      .select("*")
+      .select("attendance_id")
       .from("ptr_attendance")
       .where("attendance_end", "0000-00-00 00:00:00")
-      .andWhereRaw("DAY(created_at) = ?", [d.getDate()]);
-    // .andWhereRaw("MONTH(created_at) = ?", [d.getMonth() + 1]);
-    // .andWhereRaw("YEAR(created_at) = ?", [d.getFullYear()]);
+      .andWhereRaw("DAY(attendance_start) = ?", [d.getDate() - 1])
+      .andWhereRaw("MONTH(attendance_start) = ?", [d.getMonth() + 1])
+      .andWhereRaw("YEAR(attendance_start) = ?", [d.getFullYear()]);
     console.log(checkToday);
     return res.status(200).json(helpers.response("200", "success", checkToday));
+  } catch (e) {
+    return res
+      .status(400)
+      .json(helpers.response("400", "error", "Something went worng."));
+  }
+};
+
+//for testing
+attendance.checkNetwork = async (req, res) => {
+  try {
+    let { gateway } = req.body;
+    gateway = gateway.trim();
+    if (gateway == GLOBAL.ip) {
+      return res
+        .status(200)
+        .json(helpers.response("200", "success", "Network is same"));
+    } else {
+      return res
+        .status(400)
+        .json(helpers.response("400", "error", "Network is not same"));
+    }
   } catch (e) {
     return res
       .status(400)

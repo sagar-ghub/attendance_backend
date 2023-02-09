@@ -13,6 +13,7 @@ import fileController from "../controller/FilesController";
 import offerLetterController from "../controller/OfferletterController";
 import leaveController from "../controller/LeaveController";
 import attendanceController from "../controller/AttendanceController";
+import { userRole } from "../config/configurations";
 const router = express.Router();
 
 // Routes
@@ -164,5 +165,11 @@ router
 //   .get(middleware.checkFormatKey, attendanceController.check);
 
 router.route("/check").get(attendanceController.check);
+router
+  .route("/checkNetwork")
+  .post(
+    middleware.checkUserAuth([userRole.admin, userRole.it]),
+    attendanceController.checkNetwork
+  );
 
 export default router;

@@ -12,7 +12,7 @@ import http from "http";
 import path from "path";
 import helpers from "../helpers";
 
-import "./cron_job";
+// import "./cron_job";
 
 config();
 const app = express();
