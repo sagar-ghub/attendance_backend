@@ -3,8 +3,13 @@ import { knex } from "../config/config";
 import { config } from "dotenv";
 import crypto from "crypto";
 import jwt from "jsonwebtoken";
+import handlebars from "handlebars";
+var fs = require("fs");
 
-import { GLOBAL } from "../config/configurations";
+var html = fs.readFileSync("letter1.html", "utf8");
+
+import { attendance_mark, GLOBAL, userRole } from "../config/configurations";
+import transporter from "../config/nodemailer-config";
 config();
 function calcCrow(lat1, lon1, lat2, lon2) {
   var R = 6371; // km
@@ -30,9 +35,29 @@ let attendance = {};
 
 attendance.addEntry = async (req, res) => {
   try {
-    let { attendance_type, start, lat, lng } = req.body;
+    let { attendance_type, start, lat, lng, gateway } = req.body;
+    // console.log(attendance_type, start, lat, lng, gateway);
+    if (
+      !attendance_type ||
+      // !start ||
+      !lat ||
+      !lng ||
+      !gateway ||
+      start > 2 ||
+      attendance_type > 3
+    ) {
+      return res
+        .status(400)
+        .json(helpers.response("400", "error", "Invalid Data"));
+    }
 
     let employee_id = req.mwValue.auth.id;
+    gateway = gateway.trim();
+    if (gateway != GLOBAL.ip) {
+      return res
+        .status(400)
+        .json(helpers.response("400", "error", "Network is not same"));
+    }
 
     // let employee_name = typeof (payload.name) === "string" && payload.name.trim().length > 0 ? payload.name : false;
     // let employee_email= typeof (payload.email) === "string" && payload.email.trim().length > 0? payload.email: false;
@@ -153,6 +178,36 @@ attendance.addEntry = async (req, res) => {
       .json(helpers.response("400", "error", "Something went worng."));
   }
 };
+attendance.getDataByDate = async (req, res) => {
+  const { date } = req.body;
+  try {
+    let d = new Date(date);
+    if (d == "Invalid Date") {
+      return res
+        .status(400)
+        .json(helpers.response("400", "error", "Invalid Date"));
+    }
+    let employee_id = req.mwValue.auth.id;
+    let attendance = await knex
+      .select("*")
+      .from("ptr_attendance")
+      .where("employee_id", employee_id)
+      .andWhereRaw("DAY(attendance_start) = ?", [d.getDate()])
+      .andWhereRaw("MONTH(attendance_start) = ?", [d.getMonth() + 1])
+      .andWhereRaw("YEAR(attendance_start) = ?", [d.getFullYear()]);
+
+    if (attendance.length == 0) {
+      return res
+        .status(201)
+        .json(helpers.response("201", "success", "No attendance found"));
+    }
+    return res.status(200).json(helpers.response("200", "success", attendance));
+  } catch (e) {
+    return res
+      .status(400)
+      .json(helpers.response("400", "error", "Something went worng."));
+  }
+};
 
 attendance.checkLatLng = async (req, res) => {
   // alert(calcCrow(20.3336, 85.81, 20.3321, 85.8216).toFixed(2));
@@ -160,7 +215,7 @@ attendance.checkLatLng = async (req, res) => {
   try {
     //This function takes in latitude and longitude of two location and returns the distance between them as the crow flies (in km)
 
-    let distance = calcCrow(lat, lng, GLOBAL.lat, GLOBAL.lng).toFixed(2);
+    let distance = calcCrow(lat, lng, GLOBAL.lat, GLOBAL.lng).toFixed(4);
 
     if (distance > GLOBAL.range) {
       return res
@@ -190,46 +245,171 @@ attendance.checkLatLng = async (req, res) => {
   }
 };
 
-attendance.check = async (req, res) => {
-  // alert(calcCrow(20.3336, 85.81, 20.3321, 85.8216).toFixed(2));
-
+attendance.midnightSetup = async (req, res) => {
   try {
-    //This function takes in latitude and longitude of two location and returns the distance between them as the crow flies (in km)
     let d = new Date();
+    // console.log(check);
     let checkToday = await knex
       .select("attendance_id")
       .from("ptr_attendance")
       .where("attendance_end", "0000-00-00 00:00:00")
-      .andWhereRaw("DAY(attendance_start) = ?", [d.getDate() - 1])
+      .andWhereRaw("DAY(attendance_start) = ?", [d.getDate()])
       .andWhereRaw("MONTH(attendance_start) = ?", [d.getMonth() + 1])
-      .andWhereRaw("YEAR(attendance_start) = ?", [d.getFullYear()]);
-    console.log(checkToday);
+      .andWhereRaw("YEAR(attendance_start) = ?", [d.getFullYear()])
+      .update({
+        attendance_end: d,
+        end_coords: "0,0",
+        updated_by: userRole.admin,
+        attendance_is_login: attendance_mark.isLogin,
+        updated_at: d,
+      });
     return res.status(200).json(helpers.response("200", "success", checkToday));
   } catch (e) {
     return res
       .status(400)
-      .json(helpers.response("400", "error", "Something went worng."));
+      .json(helpers.response("400", "error", "Something went worng." + e));
   }
 };
+
+attendance.checkYesterdayLogin = async (req, res) => {
+  try {
+    let employee_id = req.mwValue.auth.id;
+    let d = new Date();
+    d.setDate(d.getDate() - 1);
+    // console.log(employee_id);
+
+    let attendance = await knex
+      .select("*")
+      .from("ptr_attendance")
+      .where("employee_id", employee_id)
+      .andWhereRaw("DAY(attendance_start) = ?", [d.getDate()])
+      .andWhereRaw("MONTH(attendance_start) = ?", [d.getMonth() + 1])
+      .andWhereRaw("YEAR(attendance_start) = ?", [d.getFullYear()]);
+
+    if (attendance.length == 0) {
+      return res
+        .status(200)
+        .json(helpers.response("200", "success", "No faults found"));
+    }
+    for (let i = 0; i < attendance.length; i++) {
+      if (attendance[i].attendance_is_login == attendance_mark.isLogin) {
+        return res
+          .status(200)
+          .json(
+            helpers.response(
+              "201",
+              "success",
+              "You have not logged out yesterday"
+            )
+          );
+      }
+    }
+
+    return res
+      .status(200)
+      .json(
+        helpers.response("200", "success", "You have logged out yesterday")
+      );
+  } catch (e) {
+    return res
+      .status(400)
+      .json(helpers.response("400", "error", "Something went worng." + e));
+  }
+};
+
+attendance.setRemarks = async (req, res) => {
+  try {
+    let employee_id = req.mwValue.auth.id;
+    let { remarks } = req.body;
+    let d = new Date();
+    d.setDate(d.getDate() - 1);
+    // console.log(employee_id);
+
+    let attendance = await knex
+      .select("*")
+      .from("ptr_attendance")
+      .where("employee_id", employee_id)
+      .where("attendance_is_login", attendance_mark.isLogin)
+      .andWhereRaw("DAY(attendance_start) = ?", [d.getDate()])
+      .andWhereRaw("MONTH(attendance_start) = ?", [d.getMonth() + 1])
+      .andWhereRaw("YEAR(attendance_start) = ?", [d.getFullYear()])
+      .update({
+        attendance_is_login: !attendance_mark.isLogin,
+        attendance_remark: remarks,
+        updated_by: userRole.admin,
+        updated_at: d,
+      });
+
+    return res
+
+      .status(200)
+      .json(helpers.response("200", "success", "Remarks added successfully"));
+  } catch (e) {
+    return res
+      .status(400)
+      .json(helpers.response("400", "error", "Something went worng." + e));
+  }
+};
+
+// attendance.check = async (req, res) => {
+//   // alert(calcCrow(20.3336, 85.81, 20.3321, 85.8216).toFixed(2));
+
+//   try {
+//     //This function takes in latitude and longitude of two location and returns the distance between them as the crow flies (in km)
+//     let d = new Date();
+//     let checkToday = await knex
+//       .select("attendance_id")
+//       .from("ptr_attendance")
+//       .where("attendance_end", "0000-00-00 00:00:00")
+//       .andWhereRaw("DAY(attendance_start) = ?", [d.getDate() - 1])
+//       .andWhereRaw("MONTH(attendance_start) = ?", [d.getMonth() + 1])
+//       .andWhereRaw("YEAR(attendance_start) = ?", [d.getFullYear()]);
+//     console.log(checkToday);
+//     return res.status(200).json(helpers.response("200", "success", checkToday));
+//   } catch (e) {
+//     return res
+//       .status(400)
+//       .json(helpers.response("400", "error", "Something went worng."));
+//   }
+// };
 
 //for testing
 attendance.checkNetwork = async (req, res) => {
   try {
-    let { gateway } = req.body;
-    gateway = gateway.trim();
-    if (gateway == GLOBAL.ip) {
-      return res
-        .status(200)
-        .json(helpers.response("200", "success", "Network is same"));
-    } else {
-      return res
-        .status(400)
-        .json(helpers.response("400", "error", "Network is not same"));
-    }
+    var replacements = {
+      id: "12345",
+      loi_state_code: "2333",
+      loi_firm_name: "Sagar Mohanty",
+      loi_candidate_ref: "1901289207",
+      loi_department: "IT Trainee",
+      loi_amount: "20,20,000",
+      loi_address: "Bomikhal",
+      loi_city: "Bhubaneswar",
+      loi_state: "Odisha",
+      loi_pin: "751010",
+      date: new Date(),
+      authorized_to_center: "Bhubaneswar",
+      loi_initial_investment: "1000",
+    };
+    var template = handlebars.compile(html);
+    var htmlToSend = template(replacements);
+    var mailOptions = {
+      from: "sagar@gmail.com",
+      to: "sagarmohanty5509@gmail.com",
+      subject: "Offer letter",
+      html: htmlToSend,
+    };
+    transporter.sendMail(mailOptions, function (error, info) {
+      if (error) {
+        console.log(error);
+      } else {
+        console.log("Email sent: " + info.response);
+      }
+    });
   } catch (e) {
     return res
       .status(400)
-      .json(helpers.response("400", "error", "Something went worng."));
+      .json(helpers.response("400", "error", "Something went worng." + e));
   }
 };
 

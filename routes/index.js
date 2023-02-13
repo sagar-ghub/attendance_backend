@@ -152,24 +152,36 @@ router
   .route("/addAttendance")
   .post(
     middleware.checkFormatKey,
-    middleware.checkUserAuth,
+    middleware.checkUserAuth(),
     attendanceController.addEntry
   );
 
 router
   .route("/checkLocation")
   .post(middleware.checkFormatKey, attendanceController.checkLatLng);
+router
+  .route("/getAttendanceByDate")
+  .post(
+    middleware.checkFormatKey,
+    middleware.checkUserAuth(),
+    attendanceController.getDataByDate
+  );
+router.route("/midnightcall").get(attendanceController.midnightSetup);
+router
+  .route("/checkYesterdayLogin")
+  .get(middleware.checkUserAuth(), attendanceController.checkYesterdayLogin);
+router
+  .route("/setRemarks")
+  .post(middleware.checkUserAuth(), attendanceController.setRemarks);
 
 // router
 //   .route("/check")
 //   .get(middleware.checkFormatKey, attendanceController.check);
 
-router.route("/check").get(attendanceController.check);
-router
-  .route("/checkNetwork")
-  .post(
-    middleware.checkUserAuth([userRole.admin, userRole.it]),
-    attendanceController.checkNetwork
-  );
+// router.route("/check").get(attendanceController.check);
+router.route("/checkNetwork").post(
+  // middleware.checkUserAuth([userRole.admin, userRole.it]),
+  attendanceController.checkNetwork
+);
 
 export default router;

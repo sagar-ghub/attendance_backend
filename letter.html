@@ -7,8 +7,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>OFFER LETTER</title>
     <style>
-        body{
-            margin: 2mm ;
+        body {
+            margin: 2mm;
             padding: 0;
         }
     </style>
@@ -16,60 +16,74 @@
 
 <body>
     {{#each users}}
-    <img src="http://dev.therefab.com/assets/images/Png a.png" alt="" style="height: 200px; float: right; margin-top: -40px; margin-right: -40px ;">
+    <img src="http://dev.therefab.com/assets/images/Png a.png" alt=""
+        style="height: 200px; float: right; margin-top: -40px; margin-right: -40px ;">
     <div style="margin-bottom:20%;">
-        <img src="http://dev.therefab.com/assets/images/RechargeKit_LOGO.png" alt="" style="height: 70px; margin-top: -10px;">
+        <img src="http://dev.therefab.com/assets/images/RechargeKit_LOGO.png" alt=""
+            style="height: 70px; margin-top: -10px;">
         <p style="color: rgb(9, 9, 140); font-size: 20px;"><b> RECHARGEKIT COMMUNICATIONS PVT LTD</b></p>
         <!-- <h3 style="margin-top: -20px;font-size: 14px;">C.I.N:-U6402OR2015PTC019525 &nbsp;&nbsp; GST:-21AAHCR5057J1ZC </h3> -->
         <p style="font-size: 14px;"><b>Ref. RKCPL/{{this.loi_candidate_ref}}</b></p>
-        <p style="margin-right:4rem;font-size: 14px; float: right;  "><b>Date:</b> {{this.date}}</p> 
+        <p style="margin-right:4rem;font-size: 14px; float: right;  "><b>Date:</b> {{this.date}}</p>
         <div style="padding-left: 20px;">
-               <p style="font-size: 14px; font-weight: bold;margin-top:-195px;padding-top:200px;color: red;">
+            <p style="font-size: 14px; font-weight: bold;margin-top:-195px;padding-top:200px;color: rgb(9, 9, 140);">
                 To <br>
-                    M/S {{ this.loi_firm_name }} <br>
-                    {{ this.loi_address }} <br>
-                    {{ this.loi_city }} <br>
-                    {{ this.loi_state }} - {{ this.loi_pin }}
-               </p>
+                M/S {{ this.loi_firm_name }} <br>
+                {{ this.loi_address }} <br>
+                {{ this.loi_city }} <br>
+                {{ this.loi_state }} - {{ this.loi_pin }}
+            </p>
             <h2 style="text-align: center; font-size: 20px;"><u>OFFER LETTER</u></h2>
-           <p style="text-align: justify; font-size: 15px;">
-                <b style="color:red;">Dear {{ this.loi_firm_name }},</b><br>
-                With reference to your Application for Employment and the subsequent discussion we had with you, we have the pleasure to appoint you for the position of  
-                <b style="color:red;"> {{ this.loi_department }}</b> in our Organization with a CTC (including all benefits and perks) of <b> {{this.loi_amount}}</b> per annum.
-                You will be reporting to Regional Head- North (GM) - Mr. Ankit Juneja. He will be reachable on 9811211206. All your remunerations and incentives will be subject to TDS as per Government taxation rules.
-                 <br>
-                 A detailed Appointment letter indicating the terms and conditions of your employment with us will be issued to you at the time of your duties.
-                 You will be posted in<b style="color:red;">RECHARGEKIT COMMUNICATIONS PVT LTD</b>;<b style="color:red;">{{this.authorized_to_center}}</b>. Job location is <b style="color:red;">{{this.loi_state}}</b>.
-                 <br>
-                 You are advised to report for duty at the earliest but not later than 02/08/2022. You will be under probation for three months from the date of joining.<br>
-                 Please arrange to submit your original documents for verification along with one set of copies of below mentioned documents to our HR Department at HO.
-                 <br>
-                 <ul>
-                    <li>Matriculation Certificate (Date of Birth Proof).</li>
-                    <li>Education Certificates including Professional Qualification Certificates.</li>
-                    <li>Two recent passport size colored photographs.</li>
-                    <li>Experience Certificate(s) from previous employer(s).</li>
-                    <li>Last drawn Salary Slip and Reliving Letter from last Employer.</li>
-                    <li>Photocopy of PAN card, Aadhar card and Driving License.</li>
-                     <li>Photocopy of Bank Passbook/cancelled check leaf.</li>
+            <p style="text-align: justify; font-size: 15px;">
+                <b style="color:rgb(9, 9, 140);">Dear {{ this.loi_firm_name }},</b><br>
+                With reference to your Application for Employment and the subsequent discussion we had with you, we have
+                the pleasure to appoint you for the position of
+                <b style="color:rgb(9, 9, 140);"> {{ this.loi_department }}</b> in our Organization with a CTC
+                (including all
+                benefits and perks) of <b> {{this.loi_amount}}</b> per annum.
+                You will be reporting to Regional Head- North (GM) - Mr. Ankit Juneja. He will be reachable on
+                9811211206. All your remunerations and incentives will be subject to TDS as per Government taxation
+                rules.
+                <br>
+                A detailed Appointment letter indicating the terms and conditions of your employment with us will be
+                issued to you at the time of your duties.
+                You will be posted in <b style="color:rgb(9, 9, 140);"> RECHARGEKIT COMMUNICATIONS PVT LTD</b>,<b
+                    style="color:rgb(9, 9, 140);"> {{this.authorized_to_center}}</b>. Job location is <b
+                    style="color:rgb(9, 9, 140);">{{this.loi_state}}</b>.
+                <br>
+                You are advised to report for duty at the earliest but not later than 02/08/2022. You will be under
+                probation for three months from the date of joining.<br>
+                Please arrange to submit your original documents for verification along with one set of copies of below
+                mentioned documents to our HR Department at HO.
+                <br>
+            <ul>
+                <li>Matriculation Certificate (Date of Birth Proof).</li>
+                <li>Education Certificates including Professional Qualification Certificates.</li>
+                <li>Two recent passport size colored photographs.</li>
+                <li>Experience Certificate(s) from previous employer(s).</li>
+                <li>Last drawn Salary Slip and Reliving Letter from last Employer.</li>
+                <li>Photocopy of PAN card, Aadhar card and Driving License.</li>
+                <li>Photocopy of Bank Passbook/cancelled check leaf.</li>
 
-                 </ul>
-                 <br>
-                 Your appointment is subject to medical fitness to be certified by an authorized Medical officer. Upon verification if any of the documents or credentials is found to be false then your offer will be terminated with immediate effect.
-                  <br> <br>
-                 Wishing all the best.
-                 <br> <br> <br>           
-                With Regards,<br> <br> <br>
-                
-                Tapas Ranjan<br>
-                HR Manager<br>
-                Moblie No. 9938997789<br><br>
-                Please confirm your acceptance of the offer                                                                                                               
+            </ul>
+            <br>
+            Your appointment is subject to medical fitness to be certified by an authorized Medical officer. Upon
+            verification if any of the documents or credentials is found to be false then your offer will be terminated
+            with immediate effect.
+            <br> <br>
+            Wishing all the best.
+            <br> <br> <br>
+            With Regards,<br> <br> <br>
+
+            Tapas Ranjan<br>
+            HR Manager<br>
+            Moblie No. 9938997789<br><br>
+            Please confirm your acceptance of the offer
             </p>
 
         </div>
     </div>
-   
+
     <footer style="position: fixed;left: 0;bottom: 0;width: 100%; background-color: #fff;">
         <hr>
         <div class="copyright" style="text-align: center;">
@@ -80,7 +94,7 @@
                 </p>
             </div>
         </div>
-    </footer> 
+    </footer>
 
     <!-- <div style="margin-left: 25px;">
         <img src="http://dev.therefab.com/assets/images/botton.png" alt="" style=" height: 100px; margin-top: 200px;position: fixed; margin-left:-5px;">
@@ -91,6 +105,7 @@
 ​
     </div> -->
     {{/each}}
-    
+
 </body>
+
 </html>

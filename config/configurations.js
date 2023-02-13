@@ -6,10 +6,13 @@ const config = {
     hr: 2,
     it: 1,
   },
+  attendance_mark: {
+    isLogin: 1,
+  },
   GLOBAL: {
     lat: 20.2956223,
     lng: 85.8425417,
-    range: 0.02,
+    range: 0.007,
     ip: "192.168.0.1",
   },
 };
