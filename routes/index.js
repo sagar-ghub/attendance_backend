@@ -127,7 +127,11 @@ router
   .post(middleware.checkFormatKey, leaveController.editLeaveTypes);
 router
   .route("/AddLeaveApplication")
-  .post(middleware.checkFormatKey, leaveController.AddLeaveApplication);
+  .post(
+    middleware.checkFormatKey,
+    middleware.checkUserAuth(),
+    leaveController.AddLeaveApplication
+  );
 router
   .route("/leaveApplicationList")
   .get(middleware.checkFormatKey, leaveController.leaveApplicationList);
@@ -182,6 +186,12 @@ router
 router.route("/checkNetwork").post(
   // middleware.checkUserAuth([userRole.admin, userRole.it]),
   attendanceController.checkNetwork
+);
+
+router.route("/getAttendanceByEmployee").post(
+  middleware.checkFormatKey,
+  // middleware.checkUserAuth(),
+  attendanceController.getAttendanceByEmployee
 );
 
 export default router;

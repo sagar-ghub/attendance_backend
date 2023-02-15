@@ -10,6 +10,7 @@ var html = fs.readFileSync("letter1.html", "utf8");
 
 import { attendance_mark, GLOBAL, userRole } from "../config/configurations";
 import transporter from "../config/nodemailer-config";
+import moment from "moment/moment";
 config();
 function calcCrow(lat1, lon1, lat2, lon2) {
   var R = 6371; // km
@@ -406,6 +407,81 @@ attendance.checkNetwork = async (req, res) => {
         console.log("Email sent: " + info.response);
       }
     });
+  } catch (e) {
+    return res
+      .status(400)
+      .json(helpers.response("400", "error", "Something went worng." + e));
+  }
+};
+
+attendance.getAttendanceByEmployee = async (req, res) => {
+  // const { employee_id=0, fromdate, todate } = req.body;
+  const employee_id = req.body.employee_id || 0;
+  const attendance_type = req.body.attendance_type || 1;
+  const fromdate = req.body.fromdate;
+  const todate = req.body.todate;
+  const date = req.body.date || "";
+
+  const limit = req.body.limit || 10;
+  const page = req.body.page || 1;
+
+  // console.log(limit, page);
+  // console.log(employee_id);
+  //validate fromdate
+  if (fromdate == "" || moment(fromdate, "YYYY/MM/DD").isValid() == false) {
+    return res
+
+      .status(400)
+      .json(helpers.response("400", "error", "Please select FROM date"));
+  }
+
+  if (todate == "" || moment(todate, "YYYY/MM/DD").isValid() == false) {
+    return res
+
+      .status(400)
+      .json(helpers.response("400", "error", "Please select TO date"));
+  }
+
+  try {
+    let attendance = [];
+
+    // let d = new Date(moment(date + "/" + month, "DD/MM/YYYY"));
+    if (employee_id != 0) {
+      attendance = await knex
+        .select("*")
+        .from("ptr_attendance")
+        .where("employee_id", employee_id)
+        .andWhere("attendance_type", attendance_type)
+        .andWhereBetween("attendance_start", [
+          moment(fromdate, "DD/MM/YYYY").format("YYYY-MM-DD 00:00:00"),
+          moment(todate, "DD/MM/YYYY").format("YYYY-MM-DD 23:59:59"),
+        ])
+        .orderBy("attendance_start", "desc")
+        .limit(limit)
+        .offset((page - 1) * limit);
+    } else {
+      attendance = await knex
+        .select("*")
+        .from("ptr_attendance")
+        .where("attendance_type", attendance_type)
+        .andWhereBetween("attendance_start", [
+          moment(fromdate, "DD/MM/YYYY").format("YYYY-MM-DD 00:00:00"),
+          moment(todate, "DD/MM/YYYY").format("YYYY-MM-DD 23:59:59"),
+        ])
+        .orderBy("attendance_start", "desc")
+        .limit(limit)
+        .offset((page - 1) * limit);
+    }
+    // .andWhereRaw("DAY(attendance_start) = ?", [d.getDate()])
+    // .andWhereRaw("MONTH(attendance_start) = ?", [d.getMonth() + 1])
+    // .andWhereRaw("YEAR(attendance_start) = ?", [d.getFullYear()]);
+
+    if (attendance.length == 0) {
+      return res
+        .status(201)
+        .json(helpers.response("201", "success", "No attendance found"));
+    }
+    return res.status(200).json(helpers.response("200", "success", attendance));
   } catch (e) {
     return res
       .status(400)

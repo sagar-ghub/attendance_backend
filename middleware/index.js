@@ -77,6 +77,7 @@ middleware.checkUserAuth =
           if (!err && tokenData) {
             req.mwValue = {};
             req.mwValue.auth = tokenData;
+            // console.log("tokenData", tokenData);
 
             next();
           } else {

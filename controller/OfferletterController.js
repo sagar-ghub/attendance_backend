@@ -80,7 +80,7 @@ letter.sendOfferLetter = async (req, res) => {
           var htmlToSend = template(users[0]);
           var mailOptions = {
             from: "sagar@gmail.com",
-            to: "sagar.rechargekit@gmail.com",
+            to: `${candidateDetails[0].candidate_email}`,
             subject: `Offer Letter Mr. ${candidateDetails[0].candidate_name}`,
             // text: "Offer letter",
             html: htmlToSend,
@@ -129,7 +129,7 @@ letter.sendOfferLetter = async (req, res) => {
 
       var mailOptions = {
         from: "sagar@gmail.com",
-        to: "sagar.rechargekit@gmail.com",
+        to: `${candidateDetails[0].candidate_email}`,
         subject: `Sorry Mr. ${candidateDetails[0].candidate_name}`,
         // text: "Offer letter",
         text: "Sorry you are not selected",
@@ -147,8 +147,7 @@ letter.sendOfferLetter = async (req, res) => {
           helpers.response(
             "200",
             "success",
-            "Successfully generated offer letter",
-            data
+            "Successfully sent rejection letter"
           )
         );
     }
